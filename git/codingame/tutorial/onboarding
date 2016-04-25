@@ -6,9 +6,9 @@
 
 
 # game loop
-arrayName=("nul" "nul" "nul" "nul" "nul" "nul" "nul" "nul" "nul" "nul")
-arrayDist=(0 0 0 0 0 0 0 0 0 0)
-arraySpeed=(0 0 0 0 0 0 0 0 0 0)
+
+declare -A eDist
+declare -A eSpeed
 
 while true; do
     # enemy1: name of enemy 1
@@ -21,77 +21,48 @@ while true; do
     read dist2
     
     echo "Debug messages..." "enemy1" $enemy1 "dist1" $dist1 "enemy2" $enemy2 "dist2" $dist2 >&2
-    if [[ $enemy1 == "Nobody" ]]; then
-        echo $enemy2
-    elif [[ $enemy2 == "Nobody" ]]; then
-        echo $enemy1
+    if [[ $enemy1 != "Nobody" ]]; then
+		if [[ -z ${eDist[$enemy1]} ]]; then
+			eDist[$enemy1]=$dist1
+			eSpeed[$enemy1]=0
+		else
+			let eSpeed[$enemy1]=eDist[$enemy1]-dist1
+			eDist[$enemy1]=$dist1
+		fi
+		echo "Debug messages..." "Add" $enemy1", dist="$dist1 "speed="${eSpeed[$enemy1]} >&2
     fi
 
-    if [[ $enemy1 != "Nobody" && $enemy2 != "Nobody" ]]; then
-    
-        i=0
-        n=10
-        ind1=10
-        ind2=10
-        
-        while [ $i -lt $n ]; do
-            if [[ ${arrayName[$i]} == $enemy1 ]]; then
-                arraySpeed[$i]=`expr ${arrayDist[$i]} - $dist1`
-                arrayDist[$i]=$dist1
-                if [[ $ind1 != 10 ]]; then
-                    arrayName[$ind1]="nul"
-                    arraySpeed[$ind1]=0
-                    arrayDist[$ind1]=0
-                fi
-                ind1=$i
-            fi
-            if [[ ${arrayName[$i]} == "nul" && $ind1 == 10 ]]; then
-                ind1=$i
-                arrayName[$ind1]=$enemy1
-                arraySpeed[$ind1]=0
-                arrayDist[$ind1]=$dist1
-            fi
-            if [[ ${arrayName[$i]} == $enemy2 ]]; then
-                arraySpeed[$i]=`expr ${arrayDist[$i]} - $dist2`
-                arrayDist[$i]=$dist2
-                if [[ $ind2 != 10 ]]; then
-                    arrayName[$ind2]="nul"
-                    arraySpeed[$ind2]=0
-                    arrayDist[$ind2]=0
-                fi
-                ind2=$i
-            fi
-            if [[ ${arrayName[$i]} == "nul" && $ind2 == 10 ]]; then
-                ind2=$i
-                arrayName[$ind2]=$enemy2
-                arraySpeed[$ind2]=0
-                arrayDist[$ind2]=$dist2
-            fi
-            i=`expr $i + 1`
-        done
-        
-        echo "Debug messages..." "ind1" $ind1 "ind2" $ind2 >&2
-        echo "Debug messages..." "name1" ${arrayName[$ind1]} "name2" ${arrayName[$ind2]} >&2
-        echo "Debug messages..." "speed1" ${arraySpeed[$ind1]} "speed2" ${arraySpeed[$ind2]} >&2
-        echo "Debug messages..." "dist1" ${arrayDist[$ind1]} "dist2" ${arrayDist[$ind2]} >&2
-    
-        nextdist1=`expr ${arrayDist[$ind1]} - ${arraySpeed[$ind1]}`
-        nextdist2=`expr ${arrayDist[$ind2]} - ${arraySpeed[$ind2]}`
-    
-        if [[ $nextdist1 -lt $nextdist2 ]]; then
-            arrayName[$ind1]="nul"
-            arraySpeed[$ind1]=0
-            arrayDist[$ind1]=0
-            echo $enemy1
-        else
-            echo $enemy2
-            arrayName[$ind2]="nul"
-            arraySpeed[$ind2]=0
-            arrayDist[$ind2]=0
-        fi
-        echo "Debug messages..."  ${arrayName[*]} >&2
+    if [[ $enemy2 != "Nobody" ]]; then
+		if [[ -z ${eDist[$enemy2]} ]]; then
+			eDist[$enemy2]=$dist2
+			eSpeed[$enemy2]=0
+		else
+			let eSpeed[$enemy2]=eDist[$enemy2]-dist2
+			eDist[$enemy2]=$dist2
+		fi
+		echo "Debug messages..." "Add" $enemy2", dist="$dist2 "speed="${eSpeed[$enemy2]} >&2
     fi
-    
+
+	danger=""
+	closest=10000
+	for name in ${!eDist[*]};do
+		echo "Debug messages..." "Checking" $name", dist="${eDist[$name]} "speed="${eSpeed[$name]} >&2
+		if [[ ! -z ${eDist[$name]} ]]; then
+			let nextdist=eDist[$name]-eSpeed[$name]
+			if [[ $nextdist -lt $closest ]]; then
+				danger=$name
+				closest=$nextdist
+				echo "Debug messages..." $name "is more danger, next distance will be:"$closest >&2
+			fi
+		else
+		echo "Debug messages... Destroyed, pass!" >&2
+		fi
+	done
+
+	echo $danger
+	eDist[$danger]=""
+	eSpeed[$danger]=""
+	
     # Write an action using echo
     # To debug: echo "Debug messages..." >&2
 
