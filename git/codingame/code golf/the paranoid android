@@ -1,0 +1,19 @@
+read F W R X P T A E
+let W--
+for (( i=0; i<E; i++ )); do
+    read A B
+    L[$A]=$B
+done
+L[$X]=$P
+while true; do
+    read C N D
+    if [[ $N -eq 0 || $N -eq $W ]];then 
+        echo "BLOCK"
+    elif [ "$D" == "LEFT" -a $N -lt ${L[$C]} ];then
+        echo "BLOCK"
+    elif [ "$D" == "RIGHT" -a $N -gt ${L[$C]} ]; then
+        echo "BLOCK"
+    else
+        echo "WAIT"
+    fi
+done

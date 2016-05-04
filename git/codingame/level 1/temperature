@@ -1,0 +1,29 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# n: the number of temperatures to analyse
+read n
+# temps: the n temperatures expressed as integers ranging from -273 to 5526
+read -a temps
+
+current=10000
+
+for (( i=0; i<n; i++)); do
+    cursor=${temps[$i]}
+    if [[ ${cursor#-} -eq ${current#-} ]]; then
+        if [[ ${temps[$i]} -gt 0 ]]; then
+            current=$cursor
+        fi
+    elif [[ ${cursor#-} -lt ${current#-} ]]; then
+        current=$cursor
+    fi
+done
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+if [[ $n -eq 0 ]]; then
+    echo "0"
+else
+    echo $current
+fi

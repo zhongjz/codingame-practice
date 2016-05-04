@@ -1,0 +1,39 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+# ---
+# Hint: You can use the debug stream to print initialTX and initialTY, if Thor seems not follow your orders.
+
+# lightX: the X position of the light of power
+# lightY: the Y position of the light of power
+# initialTX: Thor's starting X position
+# initialTY: Thor's starting Y position
+read lightX lightY initialTX initialTY
+
+# game loop
+while true; do
+    # remainingTurns: The remaining amount of turns Thor can move. Do not remove this line.
+    read remainingTurns
+
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+    if [[ $initialTY -lt $lightY ]]; then
+		echo -n "S"
+		let initialTY++
+	else
+		if [[ $initialTY -gt $lightY ]]; then
+			echo -n "N"
+			let initialTY--
+		fi
+	fi
+    if [[ $initialTX -lt $lightX ]]; then
+		echo -n "E"
+		let initialTX++
+	else
+		if [[ $initialTX -gt $lightX ]]; then
+			echo -n "W"
+			let initialTX--
+		fi
+	fi
+	echo ""
+done

@@ -1,0 +1,8 @@
+read n
+read -a t
+c=10000
+for s in ${t[@]}; do
+[[ ${s#-} -eq ${c#-} && $s -gt 0 ]]&&c=$s
+[[ ${s#-} -lt ${c#-} ]]&&c=$s
+done
+[[ $n -eq 0 ]]&&echo "0"||echo $c

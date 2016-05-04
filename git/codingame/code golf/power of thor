@@ -1,0 +1,7 @@
+read X Y A B
+while true; do
+    read r
+    [[ $B -lt $Y ]]&&{ echo -n "S";let B++;}||{ [[ $B -gt $Y ]]&&{ echo -n "N";let B--;};}
+    [[ $A -lt $X ]]&&{ echo -n "E";let A++;}||{ [[ $A -gt $X ]]&&{ echo -n "W";let A--;};}
+	echo ""
+done
