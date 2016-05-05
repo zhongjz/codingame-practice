@@ -1,0 +1,25 @@
+#!/bin/bash
+
+read N
+touch t
+for (( i=0; i<N; i++ )); do
+    read Pi[$i]
+done
+
+for a in "${Pi[@]}"; do echo "$a"; done | sort -g -r > t 
+
+diff=30000000
+o=30000000
+
+for i in `cat t`; do
+    let diff1=o-i
+    o=$i
+    if [ $diff1 -lt $diff ]; then
+        diff=$diff1
+    fi
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $diff

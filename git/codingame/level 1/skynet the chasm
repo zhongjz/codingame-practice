@@ -1,0 +1,39 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# road: the length of the road before the gap.
+read road
+# gap: the length of the gap.
+read gap
+# platform: the length of the landing platform.
+read platform
+jumped=0
+
+# game loop
+while true; do
+    # speed: the motorbike's speed.
+    read speed
+    # coordX: the position on the road of the motorbike.
+    read coordX
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+    
+    if [[ $jumped -eq 1 ]]; then
+        echo "SLOW"
+    else
+        if [[ `expr $coordX + $speed` -gt $road ]]; then
+            echo "JUMP"
+            jumped=1
+        fi
+        if [[ $jumped -eq 0 ]]; then
+            if [[ $speed -le $gap ]]; then
+                echo "SPEED" # A single line containing one of 4 keywords: SPEED, SLOW, JUMP, WAIT.
+            elif [[ $speed -gt `expr $gap + 1` ]]; then
+                echo "SLOW"
+            else
+                echo "WAIT"
+            fi
+        fi
+    fi
+done

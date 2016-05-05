@@ -1,0 +1,30 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# N: Number of elements which make up the association table.
+read N
+# Q: Number Q of file names to be analyzed.
+read Q
+declare -A line
+for (( i=0; i<N; i++ )); do
+	# EXT: file extension
+	# MT: MIME type.
+	read EXT MT
+	bigEXT=${EXT^^}
+	line[$bigEXT]=$MT
+done
+
+for (( i=0; i<Q; i++ )); do
+	# FNAME: One file name per line.
+	read FNAME
+	echo $FNAME >&2
+	curEXT=${FNAME##*.}
+	if [[ ${#curEXT} -ne ${#FNAME} ]]; then
+		curEXT=${curEXT^^}
+		result=${line[$curEXT]}
+		[[ ! -z $result ]]&&echo $result||echo $"UNKNOWN"
+	else
+		echo $"UNKNOWN"
+	fi
+done

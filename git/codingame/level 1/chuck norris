@@ -1,0 +1,52 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read MESSAGE
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+bin=""
+result=""
+highstrings=( "000" "001" "010" "011" "100" "101" "110" "111")
+lowstrings=( "0000" "0001" "0010" "0011" "0100" "0101" "0110" "0111" "1000" "1001" "1010" "1011" "1100" "1101" "1110" "1111" )
+for (( i=0; i<${#MESSAGE}; i++ )); do
+    char=${MESSAGE:$i:1}
+    hex=`printf "%02x" "'$char"`
+    highbit=${hex:0:1}
+    lowbit=${hex:1:1}
+    highnum=`printf "%d" "0x$highbit"`
+    lownum=`printf "%d" "0x$lowbit"`
+    highstring=${highstrings[$highnum]}
+    lowstring=${lowstrings[$lownum]}
+    bin=$bin$highstring$lowstring
+done
+
+curchar=""
+count=0
+
+for (( i=0; i<${#bin}; i++ )); do
+    char=${bin:$i:1}
+    if [[ "$char" != "$curchar" ]]; then
+        for (( j=0; j<$count; j++ )); do
+            result=$result"0"
+        done
+        result=$result" "
+        if [[ $char -eq 1 ]]; then
+            result=$result"0 "
+        else
+            result=$result"00 "
+        fi
+        curchar=$char
+        count=1
+    else
+        ((count++))
+    fi
+    echo $i $char $count >&2
+done
+echo $count >&2
+for (( i=0; i<$count; i++ )); do
+    result=$result"0"
+done
+
+echo "${result:1}"

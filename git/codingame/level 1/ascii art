@@ -1,0 +1,35 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read L
+read H
+read T
+for (( i=0; i<H; i++ )); do
+    IFS= read -r ROW[$i]
+done
+text="ABCDEFGHIJKLMNOPQRSTUVWXYZ?"
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+#echo "${ROW[@]}" >&2
+
+for (( i=0; i<${#T}; i++ )); do
+    char=${T:$i:1}
+    if [[ "$char" == [a-zA-Z] ]]; then
+        char=${char^^}
+    else
+        char="?"
+    fi
+    num[$i]=`expr index $text $char` 
+done
+echo "${num[@]}" >&2
+for (( i=0; i<$H; i++ )); do
+    line=""
+    for (( j=0; j<${#T}; j++)); do
+        currow=${ROW[$i]}
+        pos=${num[$j]}
+        curchar=`expr $pos \* $L - $L`
+        line="$line""${currow:$curchar:$L}"
+    done
+    echo "$line"
+done

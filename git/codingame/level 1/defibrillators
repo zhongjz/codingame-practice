@@ -1,0 +1,45 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read LON
+read LAT
+
+fLON=${LON#*,}
+iLON=${LON%,*}
+fLAT=${LAT#*,}
+iLAT=${LAT%,*}
+
+#fLON=`echo $LON | cut -d "," -f2`
+#iLON=`echo $LON | cut -d "," -f1`
+#fLAT=`echo $LAT | cut -d "," -f2`
+#iLAT=`echo $LAT | cut -d "," -f1`
+
+read N
+result=""
+dist=30000
+for (( i=0; i<N; i++ )); do
+    
+    read DEFIB
+    #arrayName[$i]=`echo $DEFIB | cut -d ";" -f2`
+    t=`echo $DEFIB | cut -d ";" -f5`
+    cfLON=${t#*,}
+    ciLON=${t%,*}
+    #arrayLON[$i]=$t
+    t=`echo $DEFIB | cut -d ";" -f6`
+    cfLAT=${t#*,}
+    ciLAT=${t%,*}
+    #arrayLAT[$i]=$t
+    echo "sqrt((("$ciLON"."$cfLON"-"$iLON"."$fLON")/180*c(("$ciLAT"."$cfLAT"+"$iLAT"."$fLAT")/2/180*3.1415926))^2+(("$ciLAT"."$cfLAT"-"$iLAT"."$fLAT")/180*3.1415926)^2)*6371" >&2 
+    #dist1=`echo "sqrt((("$ciLON"."$cfLON"-"$iLON"."$fLON")/180*c(("$ciLAT"."$cfLAT"+"$iLAT"."$fLAT")/2/180*3.1415926535))^2+(("$ciLAT"."$cfLAT"-"$iLAT"."$fLAT")/180*3.1415926535)^2)*6371" | bc -l`
+    dist1=`echo "sqrt((("$ciLON"."$cfLON"-"$iLON"."$fLON")/180*3.1415926535*c(("$ciLAT"."$cfLAT"+"$iLAT"."$fLAT")/2/180*3.1415926535))^2+(("$ciLAT"."$cfLAT"-"$iLAT"."$fLAT")/180*3.1415926535)^2)" | bc -l`
+    if [ $(echo "$dist1 < $dist"|bc) -eq 1 ]; then 
+        dist=$dist1
+        result=`echo $DEFIB | cut -d ";" -f2`
+    fi
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $result
