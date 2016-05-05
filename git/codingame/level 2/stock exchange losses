@@ -1,0 +1,38 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read n
+echo $n >&2
+begin=0
+cur=0
+diff=0
+maxdiff=0
+read value
+
+for v in $value; do
+	#echo "Debug..." ${v[$i]} >&2
+	if [[ $begin -ne 0 ]]; then
+		if [[ $v -gt $cur ]]; then
+			cur=$v
+			if [[ $diff -gt $maxdiff ]]; then
+				maxdiff=$diff
+			fi
+		else
+		#echo "Debug..." $cur $i ${v[*]} >&2
+			let d=cur-v
+			if [[ $d -gt $diff ]]; then
+				diff=$d
+			fi
+		fi
+	else
+		cur=$v
+		begin=1
+	fi
+done
+
+[[ $maxdiff -eq 0 && $diff -ne 0 ]]&&maxdiff=$diff
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+[[ $maxdiff -ne 0 ]]&&echo "-"$maxdiff||echo "0"

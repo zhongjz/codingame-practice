@@ -1,0 +1,64 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# W: width of the building.
+# H: height of the building.
+read W H
+# N: maximum number of turns before game over.
+read N
+read X0 Y0
+u=0
+d=$H
+l=0
+r=$W
+X=$X0
+Y=$Y0
+
+# game loop
+while true; do
+    # BOMB_DIR: the direction of the bombs from batman's current location (U, UR, R, DR, D, DL, L or UL)
+    read BOMB_DIR
+    echo "Debug..." $u $d $l $r $X0 $Y0 $BOMB_DIR>&2
+	case $BOMB_DIR in
+	
+	"U")
+		let Y=(Y0+u)/2
+		d=$Y0;;
+	"UR")
+		let Y=(Y0+u)/2
+		let X=(r+X0)/2
+		d=$Y0
+		l=$X0;;
+	"R")
+		let X=(r+X0)/2
+		l=$X0;;
+	"DR")
+		let Y=(d+Y0)/2
+		let X=(r+X0)/2
+		l=$X0
+		u=$Y0;;
+	"D")
+		let Y=(d+Y0)/2
+		u=$Y0;;
+	"DL")
+		let Y=(d+Y0)/2
+		let X=(X0+l)/2
+		u=$Y0
+		r=$X0;;
+	"L")
+		let X=(X0+l)/2
+		r=$X0;;
+	"UL")
+		let Y=(Y0+u)/2
+		let X=(X0+l)/2
+		d=$Y0
+		r=$X0;;
+	esac
+	X0=$X
+	Y0=$Y
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+	echo $X $Y
+    #echo "0 0" # the location of the next window Batman should jump to.
+done

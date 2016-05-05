@@ -1,0 +1,64 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# nbFloors: number of floors
+# width: width of the area
+# nbRounds: maximum number of rounds
+# exitFloor: floor on which the exit is found
+# exitPos: position of the exit on its floor
+# nbTotalClones: number of generated clones
+# nbAdditionalElevators: ignore (always zero)
+# nbElevators: number of elevators
+read nbFloors width nbRounds exitFloor exitPos nbTotalClones nbAdditionalElevators nbElevators
+step=0
+F=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+F[$exitFloor]=2
+for (( i=0; i<nbElevators; i++ )); do
+    # elevatorFloor: floor on which this elevator is found
+    # elevatorPos: position of the elevator on its floor
+    read elevatorFloor elevatorPos
+	EF[$i]=$elevatorFloor
+	EP[$i]=$elevatorPos
+done
+
+# game loop
+while true; do
+    # cloneFloor: floor of the leading clone
+    # clonePos: position of the leading clone on its floor
+    # direction: direction of the leading clone: LEFT or RIGHT
+    read cloneFloor clonePos direction
+	echo "Debug..." $cloneFloor $clonePos $direction >&2
+	if [ $cloneFloor == "-1" -a $clonePos == "-1" -a $direction == "NONE" ]; then
+		echo "WAIT"
+		continue
+	fi
+	case ${F[$cloneFloor]} in
+	2 )
+		echo "Debug...Exiting" >&2
+		if [[ ( $exitPos -gt $clonePos && $direction == "LEFT") || ( $exitPos -lt $clonePos && $direction == "RIGHT" ) ]]; then
+			echo "BLOCK"
+		else
+			echo "WAIT"
+		fi
+		F[$cloneFloor]=1;;
+	0 )
+		echo "Debug...Finding Elevator!!!" >&2
+		found=0
+		for (( i=0; i<nbElevators; i++ )); do
+			if [[ ${EF[$i]} -eq $cloneFloor ]]; then
+				if [[ ( ${EP[$i]} -gt $clonePos && $direction == "RIGHT" ) || ( ${EP[$i]} -lt $clonePos && $direction == "LEFT" ) ]]; then
+					found=1
+				fi
+			fi
+		done
+		[[ $found -eq 1 ]]&&echo "WAIT"||echo "BLOCK"
+		F[$cloneFloor]=1;;
+	1 )
+		echo "WAIT";;
+	esac
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+
+    #echo "WAIT" # action: WAIT or BLOCK
+done

@@ -1,0 +1,27 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+number=0
+declare -A book
+read N
+#echo "total number=$N" >&2
+for (( i=0; i<N; i++ )); do
+    read telephone
+	[[ $i -eq 4000 ]]&&echo "4000" >&2
+	echo "telephone number=$telephone" >&2
+	l=${#telephone}
+	echo "telephone number length=$l" >&2
+	for (( j=1; j<l+1; j++ )); do
+		t=${telephone:0:$j}
+		echo "current string=$t" >&2
+		if [[ -z ${book[$t]} ]]; then
+			let number=number+1
+			book[$t]=0
+		fi
+	done
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $number # The number of elements (referencing a number) stored in the structure.

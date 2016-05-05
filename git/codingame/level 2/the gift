@@ -1,0 +1,45 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read N
+read C
+echo $N $C >&2
+
+T=0
+L=$C
+M=$N
+cat /dev/null > out
+for (( i=0; i<N; i++ )); do
+    read B
+    echo $B >&2
+    echo $B >> out
+    let T=T+B
+done
+
+if [[ $T -lt $C ]]; then
+    echo "IMPOSSIBLE"
+else
+    sort -g out > sorted
+    cat sorted >&2
+    for line in `cat sorted`; do
+        let temp=line*M
+        if [[ $temp -ge $L ]]; then
+            let each=L/M
+            let eachmore=each+1
+            let left=L-M*each
+            let target=M-left
+            for (( i=0; i<M; i++ )); do
+                [[ $i -lt $target ]]&&echo $each||echo $eachmore
+            done
+            break
+        else
+            let M=M-1
+            let L=L-line
+            echo $line
+        fi
+    done
+fi
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+

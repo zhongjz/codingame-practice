@@ -1,0 +1,92 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read N
+declare -a dict
+declare -A letter
+declare -A compare
+max=0
+count=0
+word=""
+
+for (( i=0; i<N; i++ )); do
+    read W
+    #echo $W >&2
+    dict[$i]=$W
+done
+read LETTERS
+l=${#LETTERS}
+
+for (( i=0; i<l; i++ )); do
+    c=${LETTERS:$i:1}
+    t=${letter["$c"]}
+    echo "_""$t""_" $i >&2
+    [[ "$t" == "" ]]&&t=0
+    let t=t+1
+    letter["$c"]=$t
+done
+
+echo ${letter[@]} >&2
+
+echo $LETTERS >&2
+
+for (( i=0; i<N; i++ )); do
+    W=${dict[$i]}
+    l=${#W}
+#    echo $l >&2
+    count=0
+    compare=()
+    for (( j=0; j<l; j++ )); do
+        c=${W:$j:1}
+#        echo "$c" >&2
+        if [[ $LETTERS =~ $c ]]; then
+            t=${compare["$c"]}
+            [[ "$t" == "" ]]&&t=1||let t=t+1
+            compare["$c"]=$t
+            t1=${letter["$c"]}
+            [[ "$t1" == "" ]]&&t1=0
+            if [[ $t -le $t1 ]]; then
+                case $c in
+                "d"|"g" )
+                    let count=count+2
+                    ;;
+                "b"|"c"|"m"|"p" )
+                    let count=count+3
+                    ;;
+                "f"|"h"|"v"|"w"|"y" )
+                    let count=count+4
+                    ;;
+                "k" )
+                    let count=count+5
+                    ;;
+                "j"|"x" )
+                    let count=count+8
+                    ;;
+                "q"|"z" )
+                    let count=count+10
+                    ;;
+                * )
+                    let count=count+1
+                    ;;
+                esac
+            else
+                count=0
+                break
+            fi
+        else
+            count=0
+            break
+        fi
+    done
+#    echo $count >&2
+    if [[ $count -gt $max ]]; then
+        max=$count
+        word=$W
+    fi
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $word

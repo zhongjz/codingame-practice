@@ -1,0 +1,69 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# n: the number of relationships of influence
+read n
+echo "Debug...Total number=$n" >&2
+declare -a T	#referrals of each person
+declare -a N	#person's collection
+declare -a H	#heads of trees
+for (( i=0; i<n; i++ )); do
+    # x: a relationship of influence between two people (x influences y)
+    read x y
+    echo "Debug...New relation=$x $y" >&2
+	N[$y]=1
+	if [[ -z ${N[$x]} ]]; then
+		echo "Not exist in tree, new head" >&2
+		N[$x]=1
+		T[$x]=$y
+		H[$x]=$x
+	else
+		echo "Exist in tree, add connection" >&2
+		if [[ -z ${T[$x]} ]]; then
+			echo "Exist in tree, first referral" >&2
+			T[$x]=$y
+		else
+			echo "Exist in tree, not first referral" >&2
+			T[$x]=${T[$x]}" "$y
+		fi
+		if [[ -n ${H[$y]} ]]; then
+    		echo "Removing referral from Headers" >&2
+			echo "Exist in header tree, removing" >&2
+			unset ${H[$y]}
+		fi
+	fi
+done
+
+level=1
+flag=1
+c=${H[*]}
+
+while [ $flag -eq 1 ]; do
+    echo "Debug...current list:$c" >&2
+    for cur in $c; do
+        echo "Debug...current node:$cur" >&2
+        if [[ -n ${T[$cur]} ]]; then
+            echo "Debug...add to waiting list:${T[$cur]}" >&2
+            if [[ -z $templist ]]; then
+                templist=${T[$cur]}
+            else
+                templist=$templist" "${T[$cur]}
+            fi
+            echo "Debug...current waiting list:$templist" >&2
+        fi
+    done
+    if [[ -z $templist ]]; then
+        flag=0
+        echo "no more nodes in waiting list, finish!!!" >&2
+    else
+        let level=level+1
+        c=$templist
+        unset templist
+    fi
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $level # The number of people involved in the longest succession of influences

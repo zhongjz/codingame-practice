@@ -1,0 +1,46 @@
+#!/bin/bash
+# Don't let the machines win. You are humanity's last hope...
+
+# width: the number of cells on the X axis
+read width
+# height: the number of cells on the Y axis
+read height
+for (( i=0; i<height; i++ )); do
+    # line: width characters, each either 0 or .
+    read line[$i]
+done
+echo ${line[@]} >&2
+node=""
+right=""
+bottom=""
+for (( i=0; i<height; i++ )); do
+    curline=${line[$i]}
+    for (( j=0; j<width; j++ )); do
+        cur=${curline:$j:1}
+        if [[ "$cur" == "0" ]]; then
+            node=$j" "$i
+            right="-1 -1"
+            bottom="-1 -1"
+            for (( k=j+1; k<width; k++ )); do
+                cur=${curline:$k:1}
+                if [[ "$cur" == "0" ]]; then
+                    right=$k" "$i
+                    break
+                fi
+            done
+            for (( k=i+1; k<height; k++ )); do
+                ncurline=${line[$k]}
+                cur=${ncurline:$j:1}
+                if [[ "$cur" == "0" ]]; then
+                    bottom=$j" "$k
+                    break
+                fi
+            done
+            echo $node" "$right" "$bottom
+        fi
+    done
+done
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+#echo "0 0 1 0 0 1" # Three coordinates: a node, its right neighbor, its bottom neighbor

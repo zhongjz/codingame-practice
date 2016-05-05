@@ -1,0 +1,270 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# surfaceN: the number of points used to draw the surface of Mars.
+read surfaceN
+cur_x=7000
+cur_y=3000
+m_plat_b=7000
+m_plat_e=0
+m_plat_y=0
+m_plat_w=0
+plat_b=7000
+plat_e=0
+plat_w=0
+
+for (( i=0; i<surfaceN; i++ )); do
+    # landX: X coordinate of a surface point. (0 to 6999)
+    # landY: Y coordinate of a surface point. By linking all the points together in a sequential fashion, you form the surface of Mars.
+    read landX landY
+    X[$i]=$landX
+    Y[$i]=$landY
+    #echo "Debug..." $landX $landY >&2
+    if [[ $cur_x -ne 7000 ]]; then
+        if [[ $cur_y -eq $landY ]]; then
+            if [[ $plat_b -eq 7000 ]]; then
+                plat_b=$cur_x
+                plat_e=$landX
+                let plat_w=plat_e-plat_b
+                m_plat_b=$plat_b
+                m_plat_e=$plat_e
+                m_plat_y=$landY
+                m_plat_w=$plat_w
+            else
+                if [[ $plat_e -eq $cur_x ]]; then
+                    plat_e=$landX
+                    let plat_w=plat_e-plat_b
+                    m_plat_b=$plat_b
+                    m_plat_e=$plat_e
+                    m_plat_y=$landY
+                    m_plat_w=$plat_w
+                else
+                    plat_b=$cur_x
+                    plat_e=$landX
+                    let plat_w=plat_e-plat_b
+                    if [[ $plat_w -lt $m_plat_w ]]; then
+                        m_plat_b=$plat_b
+                        m_plat_e=$plat_e
+                        m_plat_y=$landY
+                        m_plat_w=$plat_w
+                    fi
+                fi
+            fi
+        fi
+    fi
+    cur_x=$landX
+    cur_y=$landY
+done
+
+echo "Debug..." $m_plat_b $m_plat_e $m_plat_y>&2
+
+canyon=0
+for (( i=0; i<surfaceN; i++ )); do
+    if [ ${X[$i]} -gt $X -a ${X[$i]} -lt $m_plat_b ]; then
+        if [[ ${X[$i]}-$X -gt ${Y[$i]}-$Y ]]; then
+            canyon=1
+        fi
+    fi
+done
+
+powerX=0
+powerY=0
+direction=0
+# game loop
+while true; do
+    # hSpeed: the horizontal speed (in m/s), can be negative.
+    # vSpeed: the vertical speed (in m/s), can be negative.
+    # fuel: the quantity of remaining fuel in liters.
+    # rotate: the rotation angle in degrees (-90 to 90).
+    # power: the thrust power (0 to 4).
+    read X Y hSpeed vSpeed fuel rotate power
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+    #if [[ $vSpeed -ne 0 ]]; then
+    #    let t=Y/-vSpeed
+    #else
+    #    let t=Y/20
+    #fi
+    canyon=0
+    for (( i=0; i<surfaceN; i++ )); do
+        if [ ${X[$i]} -gt $X -a ${X[$i]} -lt $m_plat_b ]; then
+            if [[ ${X[$i]}-$X -gt $Y-${Y[$i]} ]]; then
+                echo "Debug...find canyon" ${X[$i]} $X ${Y[$i]} $Y >&2
+                canyon=1
+            fi
+        fi
+    done
+
+    let h=Y-m_plat_y
+    let fh=(1600-vSpeed*vSpeed)/2
+    if [[ $h -gt $fh ]]; then
+        let t=(h-fh)/40+40+vSpeed
+    else
+        t=`echo "($vSpeed+sqrt($vSpeed*$vSpeed+4*1.855*$h))/2/1.855" | bc`
+    fi
+    let estX=X+hSpeed*t
+    echo "Debug..." $estX $t >&2
+    if [ $m_plat_b -lt $estX -a $m_plat_e -gt $estX -a $hSpeed -lt 20 -a $hSpeed -gt "-20" ]; then
+        echo "Debug...Fine for X!" >&2
+        powerX=0
+    fi
+    
+    if [[ $vSpeed -gt "-20" ]]; then
+        echo "Debug...Fine for Y!" >&2
+        powerY=0
+    else
+        let powerY=(-18-vSpeed)/3
+#        if [[ $powerY -gt 4 ]]; then
+#            powerY=4
+#        fi
+    fi
+    if [[ $estX -gt $m_plat_e-400 ]]; then
+        #echo "On right side" >&2
+        direction=1
+        let powerX=(estX-m_plat_e+400)/200
+        [[ $t -ne 0 ]]&&let s=(X-m_plat_e+400)/t||let s=1
+        if [ $s -gt 30 -a $t -lt 20 -a $powerX -ne 0 ]; then
+            echo "Debug...Special!" >&2
+            if [[ $hSpeed -lt "-40" ]]; then
+                powerX=0
+                powerY=4
+            else
+                let powerY=powerX*3
+            fi
+        fi
+        if [ $canyon -eq 1 ]; then
+            echo "Debug...Canyonl!" >&2
+            if [[ $hSpeed -lt "-40" ]]; then
+                powerX=0
+                powerY=4
+            else
+                let powerY=powerX*3
+            fi
+        fi
+    fi
+    if [[ $estX -lt $m_plat_b+400 ]]; then
+        #echo "On left side" >&2
+        direction=0
+        let powerX=(m_plat_b-estX+400)/200
+        let s=(m_plat_b-X+400)/t
+        if [ $s -gt 30 -a $t -lt 20 -a $powerX -ne 0 ]; then
+            echo "Debug...Special!" >&2
+            if [[ $hSpeed -gt 40 ]]; then
+                powerX=0
+                powerY=4
+            else
+                let powerY=powerX*3
+            fi
+        fi
+        if [ $canyon -eq 1 ]; then
+            echo "Debug...Canyon!" >&2
+            if [[ $hSpeed -lt "-40" ]]; then
+                powerX=0
+                powerY=4
+            else
+                let powerY=powerX*3
+            fi
+        fi
+    fi
+    
+#    echo "Debug..." $powerX >&2
+    
+#    if [ $powerX -gt 5 -a $t -lt 20 ]; then
+#        if [[ $hSpeed -lt "-20" ]]; then
+#            direction=0
+#            powerX=3
+#            powerY=15
+#        fi
+#        if [[ $hSpeed -gt "20" ]]; then
+#            direction=1
+#            powerX=3
+#            powerY=15
+#        fi
+#        if [ $hSpeed -lt "20" -o $hSpeed -gt "-20" ]; then
+#            if [[ $estX -gt $m_plat_e-400 ]]; then
+#                direction=1
+#                powerX=3
+#                powerY=15
+#            fi
+#            if [[ $estX -lt $m_plat_b+400 ]]; then
+#                direction=0
+#                powerX=3
+#                powerY=15
+#            fi
+#        fi
+#   fi
+
+    if [ $m_plat_b -lt $estX -a $m_plat_e -gt $estX -a $t -lt 25 ]; then
+        echo "Debug...Final!" >&2
+        if [[ $hSpeed -gt 20 ]]; then
+            let powerX=(hSpeed-15)/5
+            direction=1
+ #           if [[ $powerX -gt 4 ]]; then
+ #               powerX=4
+ #           fi
+        fi
+        if [[ $hSpeed -lt "-20" ]]; then
+            let powerX=(-15-hSpeed)/5
+            direction=0
+  #          if [[ $powerX -gt 4 ]]; then
+  #              powerX=4
+  #          fi
+        fi
+        if [ $hSpeed -lt 20 -a $hSpeed -gt "-20" ]; then
+            powerX=0
+            if [[ $vSpeed -gt "-20" ]]; then
+                powerY=0
+            else
+                let powerY=(-18-vSpeed)/3
+            fi
+        fi
+            
+    fi
+    #echo "Debug..." $powerX $powerY >&2
+    rotate=0
+    power=0
+
+    if [[ $powerX -eq 0 ]]; then
+        rotate=0
+        power=$powerY
+        if [[ $power -gt 4 ]]; then
+            power=4
+        fi
+    else
+        if [[ $direction -eq 0 ]]; then
+            if [[ $powerY -eq 0 ]]; then
+                rotate=-90
+                power=$powerX
+                if [[ $power -gt 4 ]]; then
+                    power=4
+                fi
+            else
+                r=`echo "a($powerX/$powerY)*180/3.1415" | bc -l`
+                rotate="-"${r%%.*}
+                p=`echo "sqrt($powerX^2+$powerY^2)" | bc`
+                power=${p%%.*}
+                if [[ $power -gt 4 ]]; then
+                    power=4
+                fi
+            fi
+        else
+            if [[ $powerY -eq 0 ]]; then
+                rotate=90
+                power=$powerX
+                if [[ $power -gt 4 ]]; then
+                    power=4
+                fi
+            else
+                r=`echo "a($powerX/$powerY)*180/3.1415" | bc -l`
+                rotate=${r%%.*}
+                p=`echo "sqrt($powerX^2+$powerY^2)" | bc`
+                power=${p%%.*}
+                if [[ $power -gt 4 ]]; then
+                    power=4
+                fi
+            fi    
+        fi
+    fi
+    echo "$rotate $power" # rotate power. rotate is the desired rotation angle. power is the desired thrust power.
+done

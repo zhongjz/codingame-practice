@@ -1,0 +1,47 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+min=1
+max=0
+L=0
+T=0
+
+read N
+for (( i=0; i<N; i++ )); do
+    read X Y
+    [[ $i -ne 0 ]]&&echo $X"_"$Y >> t||echo $X"_"$Y > t
+done
+#cat t >&2 
+sort -t "_" -n -k 2 t > t1
+#cat t1 >&2
+let avg=N/2+1
+#echo "Debug...avg="$avg >&2
+a=`head -n $avg t1 | tail -n 1`
+#echo "Debug...avg line" ${a[*]} >&2
+avgY=${a##*_}
+#echo "Debug...avgY" $avgY >&2
+for line in `cat t`; do
+    #echo $line >&2
+    curX=${line%%_*}
+    curY=${line##*_}
+    #echo "curX curY" >&2
+    if [[ $min -gt $max ]];then
+        min=$curX
+        max=$curX
+    else
+        [[ $min -gt $curX ]]&&min=$curX
+        [[ $max -lt $curX ]]&&max=$curX
+    fi
+    if [[ $curY -gt $avgY ]]; then
+        let L=L+curY-avgY
+    else
+        let L=L-curY+avgY
+    fi
+    #echo "Debug...curL" $L >&2
+done
+#echo "Debug..." $min $max $L >&2
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+let T=max-min+L
+echo $T

@@ -1,0 +1,119 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read L H
+echo $L $H >&2
+for (( i=0; i<H; i++ )); do
+    read numeral
+    for (( j=0; j<20; j++ )); do
+        let temp=j*L
+        N[$j]=${N[$j]}${numeral:$temp:$L}
+    done
+done
+#for (( i=0; i<20; i++ )); do
+#    echo ${N[$i]} >&2
+#done
+
+read S1
+pos1=-1
+for (( i=0; i<S1; i++ )); do
+    read num1Line
+    let mod=i%H
+    if [[ $mod -eq 0 ]]; then
+        let pos1=pos1+1
+        N1[$pos1]=$num1Line
+    else
+        N1[$pos1]=${N1[$pos1]}$num1Line
+    fi
+done
+echo ${N1[0]} >&2
+read S2
+echo $S1 $S2 >&2
+pos2=-1
+for (( i=0; i<S2; i++ )); do
+    read num2Line
+    let mod=i%H
+    if [[ $mod -eq 0 ]]; then
+        let pos2=pos2+1
+        N2[$pos2]=$num2Line
+    else
+        N2[$pos2]=${N2[$pos2]}$num2Line
+    fi
+done
+echo ${N2[0]} >&2
+
+echo $pos1 $pos2 >&2
+read operation
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+num1=0
+num2=0
+let pos1=pos1+1
+let pos2=pos2+1
+for (( i=0; i<pos1; i++ )); do
+    let num1=num1*20
+    for (( j=0; j<20; j++ )); do
+        if [[ "${N1[$i]}" == "${N[$j]}" ]]; then
+            let num1=num1+j
+        fi
+    done
+done
+
+for (( i=0; i<pos2; i++ )); do
+    let num2=num2*20
+    for (( j=0; j<20; j++ )); do
+        if [[ "${N2[$i]}" == "${N[$j]}" ]]; then
+            let num2=num2+j
+        fi
+    done
+done
+
+echo $num1 $num2 >&2
+
+case $operation in
+
+"+" )
+let result=num1+num2
+;;
+"-" )
+let result=num1-num2
+;;
+"*" )
+let result=num1*num2
+;;
+"/" )
+let result=num1/num2
+;;
+esac
+
+echo "$result" >&2
+
+pos=0
+flag=1
+tempnum=$result
+while [ $flag -eq 1 ]; do
+    let tempnum1=tempnum/20
+    if [[ $tempnum1 -eq 0 ]]; then
+        flag=0
+        nr[$pos]=$tempnum
+    else
+        let tempnum2=tempnum-tempnum1*20
+        nr[$pos]=$tempnum2
+        let pos=pos+1
+        tempnum=$tempnum1
+    fi
+done
+
+for (( i=pos; i>=0; i-- )); do
+    cur=${nr[$i]}
+    echo $cur >&2
+    temp=${N[$cur]}
+    echo $temp >&2
+    for (( j=0; j<H; j++ )); do
+        let temp3=j*L
+        temp1=${temp:$temp3:$L}
+        echo $temp1
+    done
+done

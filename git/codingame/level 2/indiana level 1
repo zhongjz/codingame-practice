@@ -1,0 +1,50 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# W: number of columns.
+# H: number of rows.
+read W H
+for (( i=0; i<H; i++ )); do
+    # LINE: represents a line in the grid and contains W integers. Each integer represents one room of a given type.
+    read LINE[$i]
+done
+# EX: the coordinate along the X axis of the exit (not useful for this first mission, but must be read).
+read EX
+
+# game loop
+while true; do
+    read XI YI POS
+	l=${LINE[$YI]}
+	c=($l)
+	t=${c[$XI]}
+	case $t in
+	0);;
+	1|3|7|8|9|12|13)
+		let y=YI+1
+		echo "$XI $y";;
+	2|6)
+		[[ $POS == "LEFT" ]]&&let x=XI+1||let x=XI-1
+		echo "$x $YI";;
+	4|10|12)
+		if [[ $POS == "TOP" ]]; then
+			let x=XI-1
+			echo "$x $YI"
+		else
+			let y=YI+1
+			echo "$XI $y"
+		fi;;
+	5|11|13)
+		if [[ $POS == "TOP" ]]; then
+			let x=XI+1
+			echo "$x $YI"
+		else
+			let y=YI+1
+			echo "$XI $y"
+		fi;;
+	esac
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+
+    #echo "0 0" # One line containing the X Y coordinates of the room in which you believe Indy will be on the next turn.
+done

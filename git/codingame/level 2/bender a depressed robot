@@ -1,0 +1,272 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+curX=0
+curY=0
+endX=0
+endY=0
+tele1X=0
+tele1Y=0
+tele2X=0
+tele2Y=0
+curD="SOUTH"
+cat /dev/null > out
+
+nextX=0
+nextY=0
+direct=1
+direct1=("SOUTH" "EAST" "NORTH" "WEST")
+direct1pos=1
+direct2=("WEST" "NORTH" "EAST" "SOUTH")
+direct2pos=0
+beer=0
+
+route=""
+pattern=""
+
+function loop()
+{
+	if [[ "$route" =~ "$tempnext" ]]; then
+		if [[ $flagsame -eq 1 ]]; then
+			if [[ "$pattern" =~ "$tempnext" ]]; then
+				if [[ "$route" =~ "$pattern" ]]; then
+					flag=0
+					echo "LOOP"
+				else
+					flagsame=0
+				fi
+			else
+				pattern="$pattern""_""$tempnext"
+			fi
+		else
+			flagsame=1
+			pattern="$tempnext"
+		fi
+	fi
+}
+
+read L C
+for (( i=0; i<L; i++ )); do
+    read line
+    row[$i]=$line
+    echo "$line" >&2
+    if [[ $line =~ "@" ]]; then
+        #echo "Debug...find start point" >&2
+        curY=$i
+        curX=`expr index "$line" "@"`
+        let curX=curX-1
+    fi
+    if [[ $line =~ "$" ]]; then
+        #echo "Debug...find start point" >&2
+        endY=$i
+        endX=`expr index "$line" "$"`
+        let endX=endX-1
+    fi
+    if [[ $line =~ "T" ]]; then
+        if [[ $tele1X -eq 0 ]]; then
+            tele1Y=$i
+            tele1X=`expr index "$line" "T"`
+            let tele1X=tele1X-1
+            temp=${line:$tele1X}
+            if [[ $temp =~ "T" ]]; then
+                tele2Y=$i
+                tele2X=`expr index "$temp" "T"`
+                let tele2X=tele2X-1
+            fi
+        else
+            tele2Y=$i
+            tele2X=`expr index "$line" "T"`
+            let tele2X=tele2X-1
+        fi
+    fi
+done
+echo "start position:$curX $curY" >&2
+echo "end position:  $endX $endY" >&2
+echo "tele1 position:$tele1X $tele1Y" >&2
+echo "tele2 position:$tele2X $tele2Y" >&2
+
+flag=1
+flagsame=1
+while [ $flag -eq 1 ]; do
+    echo "current direction:$curD" >&2
+    case $curD in
+    "EAST")
+        let nextX=curX+1
+        nextY=$curY
+    ;;
+    "WEST")
+        let nextX=curX-1
+        nextY=$curY
+    ;;
+    "NORTH")
+        let nextY=curY-1
+        nextX=$curX
+    ;;
+    "SOUTH")
+        let nextY=curY+1
+        nextX=$curX
+    ;;
+    esac
+
+    echo "next position:$nextX $nextY" >&2
+    temp=${row[$nextY]}
+    nextb=${temp:$nextX:1}
+    echo "next block:   $nextb" >&2
+    
+    case "$nextb" in
+    "$")
+        flag=0
+        echo "$curD" >> out
+        cat out
+    ;;
+    "#")
+        echo "Changing direction for #!!!" >&2
+        if [[ $direct -eq 1 ]]; then
+            curD=${direct1[$direct1pos]}
+            let direct1pos=direct1pos+1
+            [[ $direct1pos -eq 4 ]]&&direct1pos=0
+        else
+            curD=${direct2[$direct2pos]}
+            let direct2pos=direct2pos+1
+            [[ $direct2pos -eq 4 ]]&&direct2pos=0
+        fi
+        echo "Direction changed to $curD!!!" >&2
+    ;;
+    "X")
+        if [[ $beer -eq 0 ]]; then
+            echo "Changing direction for X!!!" >&2
+            if [[ $direct -eq 1 ]]; then
+                curD=${direct1[$direct1pos]}
+                let direct1pos=direct1pos+1
+                [[ $direct1pos -eq 4 ]]&&direct1pos=0
+            else
+                curD=${direct2[$direct2pos]}
+                let direct2pos=direct2pos+1
+                [[ $direct2pos -eq 4 ]]&&direct2pos=0
+            fi
+            echo "Direction changed to $curD!!!" >&2
+        else
+            echo "Destroy it, I'm drunk!!!" >&2
+            line=${row[$nextY]}
+            echo "old line:     $line" >&2
+            let temp2=nextX+1
+            line1=${line:0:$nextX}
+            line2=${line:$temp2}
+            line="$line1"" ""$line2"
+            row[$nextY]=$line
+            echo "new line:     $line" >&2
+        fi
+    ;;
+    "I")
+        echo "Meet inverter, current state=$direct!!!" >&2
+        [[ $direct -eq 1 ]]&&direct=2||direct=1
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        echo "Pass inverter, current state=$direct!!!" >&2
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    "T")
+        if [[ ( $nextX -eq $tele1X ) && ( $nextY -eq $tele1Y ) ]]; then
+            echo "$curD" >> out
+            curX=$tele2X
+            curY=$tele2Y
+            direct1pos=0
+            direct2pos=0
+            echo "Teleport to point2!!!" >&2
+			tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+			loop
+			route="$route""_""$tempnext"
+        else
+            echo "$curD" >> out
+            curX=$tele1X
+            curY=$tele1Y
+            direct1pos=0
+            direct2pos=0
+            echo "Teleport to point1!!!" >&2
+			tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+			loop
+			route="$route""_""$tempnext"
+        fi
+    ;;
+    "B")
+        echo "Meet BEER, current state=$beer!!!" >&2
+        [[ $beer -eq 1 ]]&&beer=0||beer=1
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        echo "Drink BEER, current state=$beer!!!" >&2
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    "E")
+        echo "Changing direction EAST!!!" >&2
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        curD="EAST"
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    "W")
+        echo "Changing direction for WEST!!!" >&2
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        curD="WEST"
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    "S")
+        echo "Changing direction for SOUTH!!!" >&2
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        curD="SOUTH"
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    "N")
+        echo "Changing direction for NORTH!!!" >&2
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+        curD="NORTH"
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    ;;
+    * )
+        echo "GO through!!!" >&2
+        echo "$curD" >> out
+        curX=$nextX
+        curY=$nextY
+        direct1pos=0
+        direct2pos=0
+		tempnext="$curX""#""$curY""#""$beer""#""$direct""#""$curD"
+		loop
+		route="$route""_""$tempnext"
+    esac
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
