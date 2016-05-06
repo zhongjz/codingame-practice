@@ -1,0 +1,72 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+declare -A char
+char["A"]=".-"
+char["B"]="-..."
+char["C"]="-.-."
+char["D"]="-.."
+char["E"]="."
+char["F"]="..-."
+char["G"]="--."
+char["H"]="...."
+char["I"]=".."
+char["J"]=".---"
+char["K"]="-.-"
+char["L"]=".-.."
+char["M"]="--"
+char["N"]="-."
+char["O"]="---"
+char["P"]=".--."
+char["Q"]="--.-"
+char["R"]=".-."
+char["S"]="..."
+char["T"]="-"
+char["U"]="..-"
+char["V"]="...-"
+char["W"]=".--"
+char["X"]="-..-"
+char["Y"]="-.--"
+char["Z"]="--.."
+declare -A word
+count=0
+
+decode() {
+	local k
+	local flag
+	for (( k=0; k<N; k++ )); do
+		temp=${word[$k]}
+		l=${#temp}
+		if [[ "$temp" == "${L:$1:l}" ]]; then
+			let startpos=$1+l
+			[[ $startpos -eq $length ]]&&let count++
+			[[ $startpos -lt $length ]]&&decode $startpos
+		fi
+	done
+}
+
+read L
+length=${#L}
+echo "string to be decoded is:" $L "length:" $length >&2
+read N
+echo "there are" $N "words in dictionary" >&2
+for (( i=0; i<N; i++ )); do
+    read W
+	#echo "no." $i "word" $W >&2
+	l=${#W}
+	temp=""
+	for (( j=0; j<l; j++ )); do
+		c=${W:j:1}
+		#echo $temp ${char["$c"]} >&2
+		temp="$temp""${char[$c]}"
+	done
+	word[$i]="$temp"
+	#echo "morse code:" ${word[$i]} >&2
+done
+echo "begin decode!" >&2
+decode 0
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $count

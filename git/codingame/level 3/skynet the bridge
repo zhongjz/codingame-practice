@@ -1,0 +1,439 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+# M: the amount of motorbikes to control
+read M
+# V: the minimum amount of motorbikes that must survive
+read V
+# L0: L0 to L3 are lanes of the road. A dot character . represents a safe space, a zero 0 represents a hole in the road.
+read L[0]
+read L[1]
+read L[2]
+read L[3]
+
+
+length=${#L[0]}
+let length--
+find=0
+solution=""
+
+# 0:	SPEED
+# 1:	SLOW
+# 2:	JUMP
+# 3:	WAIT
+# 4:	UP
+# 5:	DOWN
+# 6:	just begin
+
+findsolution () {
+	local activeV
+	local x1
+	local y1
+	local a1
+	local x2
+	local y2
+	local a2
+	local x3
+	local y3
+	local a3
+	local x4
+	local y4
+	local a4
+	local speed
+	local action
+	local total
+	activeV=$1
+	x1=$xx1
+	y1=$xy1
+	a1=$xa1
+	x2=$xx2
+	y2=$xy2
+	a2=$xa2
+	x3=$xx3
+	y3=$xy3
+	a3=$xa3
+	x4=$xx4
+	y4=$xy4
+	a4=$xa4
+	speed=$2
+	action=$3
+	total=$4
+	echo "checking:" $x1 $y1 $speed "total:" $total "action:" $action >&2
+	case $action in
+	0 )
+		let speed++
+		if [[ $a1 -eq 1 ]]; then
+			if [[ ${L[$y1]:x1+1:speed} =~ "0" ]]; then
+				let activeV--
+				a1=0
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			if [[ ${L[$y2]:x2+1:speed} =~ "0" ]]; then
+				let activeV--
+				a2=0
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			if [[ ${L[$y3]:x3+1:speed} =~ "0" ]]; then
+				let activeV--
+				a3=0
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			if [[ ${L[$y4]:x4+1:speed} =~ "0" ]]; then
+				let activeV--
+				a4=0
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+		fi
+	;;
+	1 )
+		let speed--
+		if [[ $a1 -eq 1 ]]; then
+			if [[ ${L[$y1]:x1+1:speed} =~ "0" ]]; then
+				let activeV--
+				a1=0
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			if [[ ${L[$y2]:x2+1:speed} =~ "0" ]]; then
+				let activeV--
+				a2=0
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			if [[ ${L[$y3]:x3+1:speed} =~ "0" ]]; then
+				let activeV--
+				a3=0
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			if [[ ${L[$y4]:x4+1:speed} =~ "0" ]]; then
+				let activeV--
+				a4=0
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+		fi
+	;;
+	2 )
+		if [[ $a1 -eq 1 ]]; then
+			if [[ ${L[$y1]:x1+speed:1} == "0" ]]; then
+				let activeV--
+				a1=0
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			if [[ ${L[$y2]:x2+speed:1} == "0" ]]; then
+				let activeV--
+				a2=0
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			if [[ ${L[$y3]:x3+speed:1} == "0" ]]; then
+				let activeV--
+				a3=0
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			if [[ ${L[$y4]:x4+speed:1} == "0" ]]; then
+				let activeV--
+				a4=0
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+		fi
+	;;
+	3 )
+		if [[ $a1 -eq 1 ]]; then
+			if [[ ${L[$y1]:x1+1:speed} =~ "0" ]]; then
+				let activeV--
+				a1=0
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			if [[ ${L[$y2]:x2+1:speed} =~ "0" ]]; then
+				let activeV--
+				a2=0
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			if [[ ${L[$y3]:x3+1:speed} =~ "0" ]]; then
+				let activeV--
+				a3=0
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			if [[ ${L[$y4]:x+4:speed} =~ "0" ]]; then
+				let activeV--
+				a4=0
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+		fi
+	;;
+	4 )
+		if [[ $a1 -eq 1 ]]; then
+			[[ $y1 -eq 0 ]]&&return 1
+			if [[ ( ${L[$y1]:x1+1:speed-1} =~ "0" ) || ( ${L[$y1-1]:x1+1:speed} =~ "0" ) ]]; then
+				let activeV--
+				a1=0
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			[[ $y2 -eq 0 ]]&&return 1
+			if [[ ( ${L[$y2]:x2+1:speed-1} =~ "0" ) || ( ${L[$y2-1]:x2+1:speed} =~ "0" ) ]]; then
+				let activeV--
+				a2=0
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			[[ $y3 -eq 0 ]]&&return 1
+			if [[ ( ${L[$y3]:x3+1:speed-1} =~ "0" ) || ( ${L[$y3-1]:x3+1:speed} =~ "0" ) ]]; then
+				let activeV--
+				a3=0
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			[[ $y4 -eq 0 ]]&&return 1
+			if [[ ( ${L[$y4]:x4+1:speed-1} =~ "0" ) || ( ${L[$y4-1]:x4+1:speed} =~ "0" ) ]]; then
+				let activeV--
+				a4=0
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+			[[ a1 -eq 1 ]]&&let y1--
+			[[ a2 -eq 1 ]]&&let y2--
+			[[ a3 -eq 1 ]]&&let y3--
+			[[ a4 -eq 1 ]]&&let y4--
+		fi
+	;;
+	5 )
+		if [[ $a1 -eq 1 ]]; then
+			[[ $y1 -eq 3 ]]&&return 1
+			if [[ ( ${L[$y1]:x1+1:speed-1} =~ "0" ) || ( ${L[$y1+1]:x1+1:speed} =~ "0" ) ]]; then
+				let activeV--
+			fi
+		fi
+		if [[ $a2 -eq 1 ]]; then
+			[[ $y2 -eq 3 ]]&&return 1
+			if [[ ( ${L[$y2]:x2+1:speed-1} =~ "0" ) || ( ${L[$y2+1]:x2+1:speed} =~ "0" ) ]]; then
+				let activeV--
+			fi
+		fi
+		if [[ $a3 -eq 1 ]]; then
+			[[ $y3 -eq 3 ]]&&return 1
+			if [[ ( ${L[$y3]:x3+1:speed-1} =~ "0" ) || ( ${L[$y3+1]:x3+1:speed} =~ "0" ) ]]; then
+				let activeV--
+			fi
+		fi
+		if [[ $a4 -eq 1 ]]; then
+			[[ $y4 -eq 3 ]]&&return 1
+			if [[ ( ${L[$y4]:x4+1:speed-1} =~ "0" ) || ( ${L[$y4+1]:x4+1:speed} =~ "0" ) ]]; then
+				let activeV--
+			fi
+		fi
+		if [[ $activeV -lt $V ]]; then
+			return 1
+		else
+			let x1=x1+speed
+			let x2=x2+speed
+			let x3=x3+speed
+			let x4=x4+speed
+			[[ a1 -eq 1 ]]&&let y1++
+			[[ a2 -eq 1 ]]&&let y2++
+			[[ a3 -eq 1 ]]&&let y3++
+			[[ a4 -eq 1 ]]&&let y4++
+		fi
+	;;
+	esac
+	[[ $action -ne 6 ]]&&total=$total$action
+	if [[ $x1 -ge length ]]; then
+		find=1
+		solution=$total
+	fi
+	
+	for (( action=0; action<6; action++ )); do
+		xx1=$x1
+		xy1=$y1
+		xa1=$a1
+		xx2=$x2
+		xy2=$y2
+		xa2=$a2
+		xx3=$x3
+		xy3=$y3
+		xa3=$a3
+		xx4=$x4
+		xy4=$y4
+		xa5=$a4
+		if [[ $find -eq 0 ]]; then
+			if [[ $action -eq 1 ]]; then
+				[[ $speed -ne 1 ]]&&findsolution $activeV $speed 1 $total
+			else
+				findsolution $activeV $speed $action $total
+			fi
+		fi
+	done
+}
+
+xx1=0
+xy1=0
+xa1=0
+xx2=0
+xy2=0
+xa2=0
+xx3=0
+xy3=0
+xa3=0
+xx4=0
+xy4=0
+xa4=0
+
+# S: the motorbikes' speed
+read S
+
+echo $M $V >&2
+echo ${L[0]} >&2
+echo ${L[1]} >&2
+echo ${L[2]} >&2
+echo ${L[3]} >&2
+
+if [[ $M -ge 1 ]]; then
+	read X1 Y1 A1
+	xx1=$X1
+	xy1=$Y1
+	xa1=$A1
+fi
+
+if [[ $M -ge 2 ]]; then
+	read X2 Y2 A2
+	xx2=$X2
+	xy2=$Y2
+	xa2=$A2
+fi
+
+if [[ $M -ge 3 ]]; then
+	read X3 Y3 A3
+	xx3=$X3
+	xy3=$Y3
+	xa3=$A3
+fi
+
+if [[ $M -ge 4 ]]; then
+	read X4 Y4 A4
+	xx4=$X4
+	xy4=$Y4
+	xa4=$A4
+fi
+
+V1=$V
+V=$M
+while [ "$solution" == "" ]; do
+	findsolution $M $S 6 ""
+	xx1=$X1
+	xy1=$Y1
+	xa1=$A1
+	xx2=$X2
+	xy2=$Y2
+	xa2=$A2
+	xx3=$X3
+	xy3=$Y3
+	xa3=$A3
+	xx4=$X4
+	xy4=$Y4
+	xa4=$A4
+	let V--
+done
+
+echo "final solution:" $solution >&2
+# game loop
+while true; do
+	
+	length=${#solution}
+	for (( i=0; i<length-1; i++ )); do
+		act=${solution:$i:1}
+		echo "current action:" $act $i >&2
+		case $act in
+		0 )
+			echo "SPEED"
+		;;
+		1 )
+			echo "SLOW"
+		;;
+		2 )
+			echo "JUMP"
+		;;
+		3 )
+			echo "WAIT"
+		;;
+		4 )
+			echo "UP"
+		;;
+		5 )
+			echo "DOWN"
+		;;
+		esac
+		read S
+		for (( j=0; j<M; j++ )); do
+			read X Y A
+		done
+	done
+	act=${solution:$i:1}
+	case $act in
+	0 )
+		echo "SPEED"
+	;;
+	1 )
+		echo "SLOW"
+	;;
+	2 )
+		echo "JUMP"
+	;;
+	3 )
+		echo "WAIT"
+	;;
+	4 )
+		echo "UP"
+	;;
+	5 )
+		echo "DOWN"
+	;;
+	esac
+    # Write an action using echo
+    # To debug: echo "Debug messages..." >&2
+
+    #echo "SPEED" # A single line containing one of 6 keywords: SPEED, SLOW, JUMP, WAIT, UP, DOWN.
+done

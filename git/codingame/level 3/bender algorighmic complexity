@@ -1,0 +1,82 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read N
+echo $N >&2
+sum1=0
+sumlogn=0
+sumn=0
+sumnlogn=0
+sumn2=0
+sumn2logn=0
+sumn3=0
+sum2n=0
+
+overflow2n=0
+
+for (( i=0; i<N; i++ )); do
+    read num t
+	echo $num $t >&2
+	if [[ ( $num -gt 20 ) && ( $i -gt 2 ) ]]; then
+		if [[ -z $t1 ]]; then
+			t1=$t
+			num1=$num
+		else
+			sum1=`echo "scale=0;$sum1+($t-$t1)^2/1" | bc -l`
+			sumlogn=`echo "scale=3;temp=($t-$t1*l($num)/l($num1))^2;scale=0;($sumlogn+temp)/1" | bc -l`
+			sumn=`echo "scale=3;temp=($t-$t1*$num/$num1)^2;scale=0;($sumn+temp)/1" | bc -l`
+			sumnlogn=`echo "scale=3;temp=($t-$t1*l($num)/l($num1)*$num/$num1)^2;scale=0;($sumnlogn+temp)/1" | bc -l`
+			[[ $sumn2 -lt 7939566938170496300 ]]&&sumn2=`echo "scale=3;temp=($t-$t1*$num^2/$num1^2)^2;scale=0;($sumn2+temp)/1" | bc -l`
+			[[ $sumn2logn -lt 7939566938170496300 ]]&&sumn2logn=`echo "scale=3;temp=($t-$t1*l($num)/l($num1)*$num^2/$num1^2)^2;scale=0;($sumn2logn+temp)/1" | bc -l`
+			[[ $sumn3 -lt 7939566938170496300 ]]&&sumn3=`echo "scale=3;temp=($t-$t1*$num^3/$num1^3)^2;scale=0;($sumn3+temp)/1" | bc -l`
+			if [[ $num -lt 60 ]]; then
+				sum2n=`echo "scale=3;temp=($t-$t1*2^$num/2^$num1)^2;scale=0;($sum2n+temp)/1" | bc -l`
+			else
+				overflow2n=1
+			fi
+		fi
+	fi
+done
+sum1=`echo "sqrt($sum1)" | bc`
+sumlogn=`echo "sqrt($sumlogn)" | bc`
+sumn=`echo "sqrt($sumn)" | bc`
+sumnlogn=`echo "sqrt($sumnlogn)" | bc`
+sumn2=`echo "sqrt($sumn2)" | bc`
+sumn2logn=`echo "sqrt($sumn2logn)" | bc`
+sumn3=`echo "sqrt($sumn3)" | bc`
+sum2n=`echo "sqrt($sum2n)" | bc`
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+for sum in $sum1 $sumlogn $sumn $sumnlogn $sumn2 $sumn2logn $sumn3 $sum2n; do
+	echo $sum >&2
+	if [[ -z $max ]]; then
+		max=$sum
+	else
+		[[ ( $sum -eq $sum2n ) && ( $overflow2n -eq 1 ) ]]&&continue
+		if [[ $max -gt $sum ]]; then
+			max=$sum
+		fi
+	fi
+done
+
+case $max in
+$sum1 )
+	echo "O(1)";;
+$sumlogn )
+	echo "O(log n)";;
+$sumn )
+	echo "O(n)";;
+$sumnlogn )
+	echo "O(n log n)";;
+$sumn2 )
+	echo "O(n^2)";;
+$sumn2logn )
+	echo "O(n^2 log n)";;
+$sumn3 )
+	echo "O(n^3)";;
+$sum2n )
+	echo "O(2^n)";;
+esac
+

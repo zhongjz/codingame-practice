@@ -1,0 +1,103 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+declare -A value
+declare -a ocean
+declare -a answer
+oid=0
+
+read L
+read H
+
+spread() {
+	flag=1
+	curlist=$j"_"$i
+	while [ $flag -eq 1 ]; do
+		for cur in $curlist; do
+			curX=${cur%%_*}
+			curY=${cur##*_}
+			let left=curX-1
+			let right=curX+1
+			let up=curY-1
+			let down=curY+1
+#			echo "check position:" $curX $curY $cur >&2
+			if [[ $left -ge 0 ]]; then
+				cur=${row[$curY]:$left:1}
+				if [[ ( "$cur" == "O" ) && ( -z ${value[$left"_"$curY]} ) ]]; then
+					value[$left"_"$curY]=$oid
+					[[ -z $templist ]]&&templist=$left"_"$curY||templist=$templist" "$left"_"$curY
+#					echo "add left position:" $left $curY >&2
+				fi
+			fi
+			if [[ $right -lt $L ]]; then
+				cur=${row[$curY]:$right:1}
+				if [[ ( "$cur" == "O" ) && ( -z ${value[$right"_"$curY]} ) ]]; then
+					value[$right"_"$curY]=$oid
+					[[ -z $templist ]]&&templist=$right"_"$curY||templist=$templist" "$right"_"$curY
+#					echo "add right position:" $right $curY >&2
+				fi
+			fi
+			if [[ $up -ge 0 ]]; then
+				cur=${row[$up]:$curX:1}
+				if [[ ( "$cur" == "O" ) && ( -z ${value[$curX"_"$up]} ) ]]; then
+					value[$curX"_"$up]=$oid
+					[[ -z $templist ]]&&templist=$curX"_"$up||templist=$templist" "$curX"_"$up
+#					echo "add up position:" $curX $up >&2
+				fi
+			fi
+			if [[ $down -lt $H ]]; then
+				cur=${row[$down]:$curX:1}
+				if [[ ( "$cur" == "O" ) && ( -z ${value[$curX"_"$down]} ) ]]; then
+					value[$curX"_"$down]=$oid
+					[[ -z $templist ]]&&templist=$curX"_"$down||templist=$templist" "$curX"_"$down
+#					echo "add down position:" $curX $down >&2
+				fi
+			fi
+		done
+		if [[ -z $templist ]]; then
+			flag=0
+		else
+			curlist=$templist
+			unset templist
+		fi
+	done
+}
+
+for (( i=0; i<H; i++ )); do
+    read row[$i]
+#	echo ${row[$i]} >&2
+done
+
+for (( i=0; i<H; i++ )); do
+    for (( j=0; j<L; j++ )); do
+		cur=${row[$i]:$j:1}
+#		echo "current position:" $j $i "current char:" $cur >&2
+		if [[ ( "$cur" == "O" ) && ( -z ${value[$j"_"$i]} ) ]]; then
+			let oid++
+#			echo "find ocean:" $oid >&2
+			value[$j"_"$i]=$oid
+			spread
+		else
+			[[ "$cur" == "#" ]]&&value[$j"_"$i]=0
+#			echo "find land:" $oid >&2
+		fi
+	done
+done
+
+for (( i=0; i<H; i++ )); do
+    for (( j=0; j<L; j++ )); do
+		cur=${value[$j"_"$i]}
+		[[ $cur -ne 0 ]]&&let ocean[cur]++
+	done
+done
+
+read N
+for (( i=0; i<N; i++ )); do
+    read X Y
+#	echo "requesting position:" $X $Y "ocean:" ${value[$X"_"$Y]} "size:" ${ocean[${value[$X"_"$Y]}]} >&2 
+	[[ ${value[$X"_"$Y]} -eq 0 ]]&&answer[$i]=0||answer[$i]=${ocean[${value[$X"_"$Y]}]}
+done
+
+for (( i=0; i<N; i++ )); do
+    echo ${answer[$i]}
+done

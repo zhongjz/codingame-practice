@@ -1,0 +1,57 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+declare -a P
+declare sum
+declare -a subtotal
+declare -a subturn
+declare pos=0
+declare first=0
+
+read L C N
+echo $L $C $N >&2
+for (( i=0; i<N; i++ )); do
+    read P[$i]
+done
+
+for (( i=0; i<C; i++ )); do
+	flag=1
+	place=$L
+	first=$pos
+	if [[ -n ${subturn[$first]} ]]; then
+		subsum=0
+		subsum1=0
+		let "remain=(C-i)%(i-subturn[first])"
+		let "turn=(C-i)/(i-subturn[first])"
+		for (( j=subturn[first]; j<i; j++ )); do
+			[[ $j-${subturn[$first]} -eq $remain ]]&&subsum1=$subsum
+			let subsum=subsum+subtotal[j]
+		done
+		echo $sum ${subturn[$first]} $i $remain $turn $subsum $subsum1 >&2
+		let sum=sum+subsum*turn+subsum1
+		break
+	else
+		sub=0
+		while [ $flag -eq 1 ]; do
+			let left=place-P[pos]
+			if [[ $left -ge 0 ]]; then
+				place=$left
+				let sub=sub+P[pos]
+				let pos=pos+1
+				[[ $pos -eq $N ]]&&pos=0
+				[[ $pos -eq $first ]]&&flag=0
+			else
+				flag=0
+			fi
+		done
+		let sum=sum+sub
+		subtotal[$i]=$sub
+		subturn[$first]=$i
+	fi
+	[[ $i -eq 500000 ]]&&echo 500000 >&2
+done
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $sum

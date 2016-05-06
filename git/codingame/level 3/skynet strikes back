@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# N: the total number of nodes in the level, including the gateways
+# L1: the number of links
+# E1: the number of exit gateways
+# C:  the array of each node's connection number
+# L:  the array of all links
+# E:  the array of exit gateways
+# E2: the array of all nodes, 1 means the node is exit gateway
+# W:  the array of node's weight, count by how many exit gateways connect to this node.
+# O:  the status of link, 1 means the link is severed
+# PL: the array of links connect to exit gateway
+# t:  the number of links in array PL
+
+# data initialization
+read N L1 E1
+declare -A D
+for (( i=0; i<L1; i++ )); do
+	# N1 and N2 defines a link between these nodes
+	read N1 N2
+	let "C[$N1]++"
+	let "C[$N2]++"
+	L[$i]=$N1" "$N2
+done
+
+for (( i=0; i<E1; i++ )); do
+	# EI: the index of a gateway node
+	read EI
+	E[$i]=$EI
+	E2[$EI]=1
+done
+
+t=0
+for (( i=0; i<L1; i++ )); do
+	link=${L[$i]}
+	N1=${link%" "*}
+	N2=${link#*" "}
+	if [[ ${E2[$N1]} -eq 1 ]]; then
+		let W[$N2]++
+		PL[$t]=$link"_L"
+		let t++
+		O[$t]=0
+	fi
+	if [[ ${E2[$N2]} -eq 1 ]]; then
+		let W[$N1]++
+		PL[$t]=$link"_F"
+		let t++
+		O[$t]=0
+	fi
+done
+
+# game loop
+while true; do
+	# SI: The index of the node on which the Skynet agent is positioned this turn
+	read SI
+	flag=0
+	
+	# If there is a link just between agent and exit gateway, serve it
+	for (( i=0; i<t; i++ )); do
+		# N1 and N2 defines a link between these nodes
+		[[ ${O[$i]} -eq 1 ]]&&continue
+		temp=${PL[$i]}
+		link=${temp%_*}
+		N1=${link%" "*}
+		N2=${link#*" "}
+		if [[ $N1 -eq $SI ]]; then
+			echo $link
+			O[$i]=1
+			flag=1
+			let W[N2]--
+			let C[N1]--
+		fi
+		if [[ $N2 -eq $SI ]]; then
+			echo $link
+			O[$i]=1
+			flag=1
+			let W[N1]--
+			let C[N2]--
+		fi
+	done
+	
+	# Serve the most closest link. Count by distance to agent minus the sum of weight of nodes on the shortest path.
+	# Only check close links to save time
+	if [[ $flag -eq 0 ]]; then
+		maxdist=1
+		head=$SI
+		unset V
+		V[$head]=0
+		flag=0
+		curlist=$SI
+		while [ $flag -eq 0 ]; do
+			for cur in $curlist; do
+				[[ -z ${W[$cur]} ]]&&W[$cur]=0
+				for (( j=0; j<L1; j++ )); do
+					tlink=${L[$j]}
+					tN1=${tlink%" "*}
+					tN2=${tlink#*" "}
+					if [[ ( $tN1 -eq $cur ) && ( -z ${E2[$tN2]} ) ]]; then
+						[[ -z ${W[$tN2]} ]]&&W[$tN2]=0
+						let temp=V[$cur]+1-W[$tN2]
+						[[ $temp -gt 2 ]]&&continue
+						if [[ -z ${V[$tN2]} ]]; then
+							V[$tN2]=$temp
+							[[ -z $templist ]]&&templist=$tN2||templist=$templist" "$tN2
+							echo "add" $tN2 $cur ${V[$cur]} ${W[$tN2]} $temp >&2
+						fi
+					fi
+					if [[ ( $tN2 -eq $cur ) && ( -z ${E2[$tN1]} ) ]]; then
+						[[ -z ${W[$tN1]} ]]&&W[$tN1]=0
+						let temp=V[$cur]+1-W[$tN1]
+						[[ $temp -gt 2 ]]&&continue
+						if [[ -z ${V[$tN1]} ]]; then
+							V[$tN1]=$temp
+							[[ -z $templist ]]&&templist=$tN1||templist=$templist" "$tN1
+							echo "add" $tN1 $cur ${V[$cur]} ${W[$tN1]} $temp >&2
+						fi
+					fi
+				done
+			done
+			if [[ -z $templist ]]; then
+				flag=1
+			else
+				curlist=$templist
+				unset templist
+			fi
+		done
+		
+		# add weight to links to get the most dangerous link
+		for (( i=0; i<t; i++ )); do
+			temp=${PL[$i]}
+			flag=${temp#*_}
+			link=${temp%_*}
+			N1=${link%" "*}
+			N2=${link#*" "}
+			[[ $flag == "F" ]]&&DIS=${V[$N1]}||DIS=${V[$N2]}
+			echo $N1 $N2 $DIS >&2
+			[[ -z $DIS ]]&&DIS=3
+			[[ $flag == "F" ]]&&let W1[i]=(W[N1]+N-DIS)*N+C[N2]||let W1[i]=(W[N2]+N-DIS)*N+C[N1]
+		done
+		max=0
+		pos=0
+		for (( i=0; i<t; i++ )); do
+			if [[ ( ${W1[$i]} -gt $max ) && ( ${O[$i]} -eq 0 ) ]]; then 
+				max=${W1[$i]}
+				pos=$i
+			fi
+		done
+		temp=${PL[$pos]}
+		link=${temp%_*}
+		flag=${temp#*_}
+		N1=${link%" "*}
+		N2=${link#*" "}
+		echo $link
+		O[$pos]=1
+		if [[ $flag == "F" ]]; then
+			let W[N1]--
+			let C[N2]--
+		else
+			let W[N2]--
+			let C[N1]--
+		fi
+	fi
+done

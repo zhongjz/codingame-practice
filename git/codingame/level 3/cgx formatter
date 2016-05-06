@@ -1,0 +1,76 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+quote=0
+level=0
+newline=0
+newlinetext=0
+
+read N
+for (( i=0; i<N; i++ )); do
+    read CGXLine
+	#echo $CGXLine >&2
+	length=${#CGXLine}
+	for (( j=0; j<length; j++ )); do
+		c=${CGXLine:$j:1}
+		if [[ $quote -eq 1 ]]; then
+			printf "%c" "$c"
+			[[ "$c" == "'" ]]&&quote=0
+		else
+			case "$c" in
+			"(" )
+				if [[ $newline -eq 1 ]]; then
+					printf "\n"
+					for (( k=0; k<level; k++ )); do printf "    "; done
+				fi
+				printf "%c" $c
+				let level=level+1
+				newline=1
+				newlinetext=1
+				;;
+			")" )
+				printf "\n"
+				let level=level-1
+				for (( k=0; k<level; k++ )); do printf "    "; done 
+				printf "%c" $c
+				newline=1
+				;;
+			"'" )
+				if [[ $newlinetext -eq 1 ]]; then
+					printf "\n"
+					for (( k=0; k<level; k++ )); do printf "    "; done
+				fi
+				printf "%c" $c
+				quote=1
+				newline=1
+				newlinetext=0
+				;;
+			";" )
+				printf "%c" $c
+				printf "\n"
+				for (( k=0; k<level; k++ )); do printf "    "; done
+				newline=0
+				;;
+			[[:space:]])
+			;;
+#			'^|' )
+#			;;
+			* )
+				if [[ $newlinetext -eq 1 ]]; then
+					printf "\n"
+					for (( k=0; k<level; k++ )); do printf "    "; done
+				fi
+				printf "%c" "$c"
+				newline=1
+				newlinetext=0
+				;;
+			esac
+		fi
+	done
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+#echo "answer"

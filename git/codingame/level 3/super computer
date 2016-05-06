@@ -1,0 +1,29 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+read N
+cat /dev/null > temp
+for (( i=0; i<N; i++ )); do
+    read J D
+	let E=J+D-1
+	echo $J"_"$E >> temp
+done
+
+sort 
+answer=0
+end=0
+sort -t "_" -k 2n temp -o temp
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+for line in `cat temp`; do
+	b=${line%%_*}
+	e=${line##*_}
+	if [[ $b -gt $end ]]; then
+		let answer=answer+1
+		end=$e
+	fi
+done
+
+echo "$answer"

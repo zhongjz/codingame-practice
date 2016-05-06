@@ -1,0 +1,54 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+declare -a value
+declare -a path
+declare -a door1
+declare -a door2
+declare -a sum
+read N
+for (( i=0; i<N; i++ )); do
+    read room
+	echo $room >&2
+	temp=( $room )
+	value[$i]=${temp[1]}
+	door1[$i]=${temp[2]}
+	door2[$i]=${temp[3]}
+	[[ ${temp[0]} -eq 0 ]]&&curlist=${temp[0]}
+done
+
+flag=1
+max=${value[0]}
+sum[0]=$max
+path[0]="0"
+while [ $flag -eq 1 ]; do
+	for cur in $curlist; do
+		for room in ${door1[$cur]} ${door2[$cur]}; do
+			if [[ $room == "E" ]]; then
+				[[ ${sum[$cur]} -gt $max ]]&&max=${sum[$cur]}
+			else
+				if [[ ${path[$cur]} =~ " "$room" " ]]; then
+					continue
+				else
+					let temp=sum[cur]+value[room]
+					if [[ ( -z ${sum[$room]} ) || ( ${sum[$room]} -lt $temp ) ]]; then
+						sum[$room]=$temp
+						path[$room]=${path[$cur]}" "$room
+						[[ -z $templist ]]&&templist=$room||templist=$templist" "$room
+					fi
+				fi
+			fi
+		done
+	done
+	if [[ -z $templist ]]; then
+		flag=0
+	else
+		curlist=$templist
+		unset templist
+	fi
+done
+echo ${path[12]} >&2
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $max

@@ -1,0 +1,113 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+declare -a fullname
+declare -A distance
+declare -a path
+declare -A stopcode
+declare -a lat
+declare -a lon
+declare -a value
+declare -a route
+
+read startPoint
+read endPoint
+echo $startPoint $endPoint >&2
+read N
+echo "Total Number:" $N >&2
+for (( i=0; i<N; i++ )); do
+	read name
+	stopName=${name%%,*}
+	#echo "current reading stop name" $stopName >&2
+	[[ $stopName == $startPoint ]]&&startPoint=$i
+	[[ $stopName == $endPoint ]]&&endPoint=$i
+	stopcode[$stopName]=$i
+	fullname[$i]=`echo $name | cut -d "," -f2`
+	#echo "stop number:" $i "full name:" ${fullname[$i]} >&2
+	lat[$i]=`echo $name | cut -d "," -f4`
+	lon[$i]=`echo $name | cut -d "," -f5`
+done
+echo "startpoint:" $startPoint >&2
+echo "endpoint:" $endPoint >&2
+if [[ $startPoint -eq $endPoint ]]; then
+	echo ${fullname[$startPoint]} | sed 's/"//g'
+	exit 0
+fi
+read M
+for (( i=0; i<M; i++ )); do
+	read route
+	startstop=${route%% *}
+	endstop=${route##* }
+	startcode=${stopcode[$startstop]}
+	endcode=${stopcode[$endstop]}
+	if [[ -z ${path[$startcode]} ]]; then
+		path[$startcode]=$endcode
+	else
+		path[$startcode]=${path[$startcode]}" "$endcode
+	fi
+	#echo "startcode: " $startcode "endcode: " $endcode >&2
+	latitude1=${lat[$startcode]}
+	longtitude1=${lon[$startcode]}
+	latitude2=${lat[$endcode]}
+	longtitude2=${lon[$endcode]}
+	distance[$startcode"_"$endcode]=`echo "sqrt((("$longtitude1"-("$longtitude2"))/180*3.1415926535*c(("$latitude1"+"$latitude2")/2/180*3.1415926535))^2+(("$latitude1"-("$latitude2"))/180*3.1415926535)^2)" | bc -l`
+	#distance[$startcode"_"$endcode]=1
+	#echo "distance between" $startcode "and" $endcode "is:" ${distance[$endcode"_"$startcode]} >&2
+done
+
+flag=1
+route[$startPoint]=$startPoint
+value[$startPoint]=0
+curlist=$startPoint
+while [ $flag -eq 1 ]; do
+	for cur in $curlist; do
+		#echo "checking stop:" $cur >&2
+		for stop in ${path[$cur]}; do
+			#echo "find stop:" $stop >&2
+			[[ $stop -eq $endPoint ]]&&flag=0
+			tempvalue=`echo ${value[$cur]}"+"${distance[$cur"_"$stop]} | bc`
+			if [[ -z ${value[$stop]} ]]; then
+				#echo "add stop" $stop "to list" >&2
+				value[$stop]=$tempvalue
+				route[$stop]=${route[$cur]}" "$stop
+				#echo "set stop" $stop "value to" $tempvalue "and route to" ${route[$cur]}" "$stop >&2
+				if [[ -z templist ]]; then
+					templist=$stop
+				else
+					templist=$templist" "$stop
+				fi
+			else
+				if [[ $(echo "$tempvalue < ${value[$stop]}"|bc) -eq 1 ]]; then
+					#echo "found shorter path, add stop " $stop "tolist" >&2
+					value[$stop]=$tempvalue
+					route[$stop]=${route[$cur]}" "$stop
+					if [[ -z templist ]]; then
+						templist=$stop
+					else
+						templist=$templist" "$stop
+					fi
+				fi
+			fi
+		done
+	done
+	#echo "templist: " $templist >&2
+	if [[ -z $templist ]]; then
+		flag=0
+		#echo "no more stop, exit." >&2
+	else
+		curlist=$templist
+		unset templist
+	fi
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+echo $endPoint >&2
+echo ${route[$endPoint]} >&2
+if [[ ! -z ${route[$endPoint]} ]]; then
+	for stop in ${route[$endPoint]}; do
+		echo ${fullname[$stop]} | sed 's/"//g'
+	done
+else
+	echo "IMPOSSIBLE"
+fi

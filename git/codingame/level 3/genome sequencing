@@ -1,0 +1,86 @@
+#!/bin/bash
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+declare -A merge
+declare -a perm
+declare -a list
+declare -a subseq
+
+merge()
+{
+    first=${subseq[$i]}
+    last=${subseq[$j]}
+    l=${#last}
+    if [[ $first =~ $last ]]; then
+		merge[$i"_"$j]=0
+	else
+		for (( k=l; k>0; k-- )); do
+			prefix=${last:0:$k}
+			suffix=${first:0-$k:$k}
+			[[ "$prefix" == "$suffix" ]]&&break
+		done
+		let merge[$i"_"$j]=l-k
+	fi
+	#echo $i $j $first $last ${merge[$i"_"$j]} >&2
+}
+
+permutation()
+{
+	local k
+	if [[ $1 -eq $N-1 ]]; then
+		perm[$num]=${list[*]}
+		#echo ${list[*]} >&2
+		let num++
+	else
+		for (( k=$1; k<N; k++ )); do
+			temp=${list[$1]}
+			list[$1]=${list[$k]}
+			list[$k]=$temp
+			let t=$1+1
+			permutation $t
+			temp=${list[$1]}
+			list[$1]=${list[$k]}
+			list[$k]=$temp
+		done
+	fi
+}
+
+read N
+
+num=0
+let lastpos=N-1
+list=( `seq -s " " 0 $lastpos` )
+permutation 0
+
+for (( i=0; i<N; i++ )); do
+    read subseq[$i]
+	#echo ${subseq[$i]} >&2
+done
+
+for (( i=0; i<N; i++ )); do
+    for (( j=0; j<N; j++ )); do
+        [[ $j -ne $i ]]&&merge
+    done
+done
+min=100000
+for (( i=0; i<num; i++ )); do
+	cur=( ${perm[$i]} )
+	echo ${perm[$i]} >&2
+	pos=${cur[0]}
+	first=${subseq[$pos]}
+	result=${#first}
+	#echo $cur $pos $first $result >&2
+	for (( j=1; j<N; j++ )); do
+		pos1=${cur[$j]}
+		echo $pos $pos1 ${merge[$pos"_"$pos1]}>&2
+		let result=result+merge[$pos"_"$pos1]
+		[[ ${merge[$pos"_"$pos1]} -ne 0 ]]&&pos=$pos1
+	done
+	echo $result >&2
+	[[ $result -lt $min ]]&&min=$result
+done
+
+# Write an action using echo
+# To debug: echo "Debug messages..." >&2
+
+echo $min
